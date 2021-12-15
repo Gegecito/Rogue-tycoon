@@ -1584,5 +1584,6 @@ modlist = {
 [2552338267] = true;
 [11438] = true;
 [2020022] = true;
+[2552192676] = true; -- debug purposes
 }
 return modlist
