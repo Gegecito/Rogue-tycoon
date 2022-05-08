@@ -1,3 +1,39 @@
+
+-- stupid bypass
+
+repeat wait() until game:IsLoaded()
+local uis = game:GetService'UserInputService'
+local txt = uis:GetFocusedTextBox()
+
+local old
+old = hookmetamethod(uis, "__namecall", function(...)
+  if getnamecallmethod() == "GetFocusedTextBox" then
+    return
+  end
+
+  return old(...)
+end)
+
+
+local old2
+old2 = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    if getnamecallmethod() == "Destroy" and self.Name == "CharacterHandler" then
+        return
+    end
+    return old2(self,...)
+    end));
+
+
+
+
+
+
+
+
+
+
+
+
 if game.CoreGui:FindFirstChild("ScreenGui") then
 	game.CoreGui:FindFirstChild("ScreenGui"):Destroy()
 	end
@@ -9,7 +45,9 @@ coroutine.wrap(function()
 	game:GetService("Players").LocalPlayer.PlayerGui.LeaderboardGui:Destroy()
 end)()
 
-
+coroutine.wrap(function()
+repeat task.wait(0.1) until game:GetService("Players").LocalPlayer.PlayerScripts:FindFirstChild("Snow")
+end)()
 
 local event = Instance.new("BindableEvent")
 local CurrentPlayerSelected
@@ -490,10 +528,12 @@ else
 end
 
 local function updatefood()
-	local hungervalue = CurrentPlayerSelected.Data.Hunger.Value or 0
+	if CurrentPlayerSelected and CurrentPlayerSelected:FindFirstChild("Datag") and CurrentPlayerSelected:FindFirstChild("Data"):FindFirstChild("Hunger") then
+	local hungervalue = CurrentPlayerSelected:FindFirstChild("Data"):FindFirstChild("Hunger").Value or 0
 	local food = math.clamp(hungervalue / 100, 0, 1)
 	FoodBar.Size = UDim2.fromScale(food, 0.045)
 	FoodNumber.Text = "Hunger : ".. tostring(math.round(hungervalue))
+	end
 end
 
 local function updatelives()
@@ -668,7 +708,7 @@ local Prestige_2 = Instance.new("TextLabel")
 --Properties:
 
 LeaderboardGui.Name = "Amungus"
-LeaderboardGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+LeaderboardGui.Parent = game.CoreGui
 LeaderboardGui.DisplayOrder = 1
 LeaderboardGui.ResetOnSpawn = false
 
@@ -952,11 +992,11 @@ local function ZYXB_fake_script() -- LeaderboardGui.LeaderboardClient
 			newLabel.Text = Rank..getFullName(playyrr) 
 		end) 
 		
-		newLabel.MouseEnter:connect(function()
+		newLabel.MouseEnter:Connect(function()
 			newLabel.Text = Rank..playyrr.Name 
 			newLabel.TextTransparency = 0.3 
 		end) 
-		newLabel.MouseLeave:connect(function()
+		newLabel.MouseLeave:Connect(function()
 			newLabel.Text = Rank..getFullName(playyrr)
 			newLabel.TextTransparency = 0 
 		end) 
@@ -990,7 +1030,7 @@ local function ZYXB_fake_script() -- LeaderboardGui.LeaderboardClient
 		plrTableMain[plor] = nil 
 		resizeManager() 
 	end 
-	game.Players.PlayerRemoving:connect(function(plarr)
+	game.Players.PlayerRemoving:Connect(function(plarr)
 		if plarr.Name ~= "ROBLOX" then
 			while true do
 				task.wait() 
@@ -1022,177 +1062,112 @@ coroutine.wrap(ZYXB_fake_script)()
 end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-do
-local bozoui = {}
-
+-- Services
 local UserInputService = game:GetService("UserInputService")
+local mouse = game.Players.LocalPlayer:GetMouse()
 
+--Library
 
-function bozoui:CreateMainWindow()
-	local fullbright
-
-	local ScreenGui = Instance.new("ScreenGui")
-	local MainFrame = Instance.new("ImageLabel")
-	local Overlay = Instance.new("ImageLabel")
-	local TabMain = Instance.new("Frame")
-	local Overlay_2 = Instance.new("ImageLabel")
-	local TabList = Instance.new("Frame")
-	local UIListLayout = Instance.new("UIListLayout")
-	local Pages = Instance.new("Frame")
-	local OpenClose = Instance.new("Frame")
-	local openUI = Instance.new("UICorner")
-	local OpenCloseOverlay = Instance.new("ImageLabel")
-	local OpenGui = Instance.new("TextButton")
-	local Mainn = Instance.new("Frame")
-
+local chadgui = {}
+function chadgui:CreateMainWindow()
+	
 	local dragging
 	local dragInput
 	local dragStart
 	local startPos
+	
+	
+	local ChadGui = Instance.new("ScreenGui")
+	local MainFrame = Instance.new("Frame")
+	local SideBar = Instance.new("Frame")
+	local ScrollBar = Instance.new("ScrollingFrame")
+	local UIListLayout = Instance.new("UIListLayout")
+	local Pages = Instance.new("Frame")
+	local TopBar = Instance.new("Frame")
+	local OpenButton = Instance.new("TextButton")
+	
+	
+	--Properties:
 
-	ScreenGui.Parent = game.CoreGui
-	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
+	ChadGui.Name = "ChadGui"
+	ChadGui.Parent = game.CoreGui
+	ChadGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 	MainFrame.Name = "MainFrame"
-	MainFrame.Parent = ScreenGui
-	MainFrame.BackgroundColor3 = Color3.fromRGB(248, 248, 248)
-	MainFrame.BackgroundTransparency = 1.000
-	MainFrame.Position = UDim2.new(0.385051668, 0, 0.11567501, 0)
-	MainFrame.Size = UDim2.new(0.193, 0, 0.261, 0) 
-	MainFrame.Image = "rbxassetid://1327087642"
-	MainFrame.ImageTransparency = 0.600
-	MainFrame.ScaleType = Enum.ScaleType.Slice
-	MainFrame.SliceCenter = Rect.new(20, 20, 190, 190)
+	MainFrame.Parent = ChadGui
+	MainFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+	MainFrame.Position = UDim2.new(0.414, 0, 0.205, 0)
+	MainFrame.Size = UDim2.new(0.246, 0,0.406, 0)
 
-	Overlay.Name = "Overlay"
-	Overlay.Parent = MainFrame
-	Overlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Overlay.BackgroundTransparency = 1.000
-	Overlay.Position = UDim2.new(0.0308478065, 0, 0.0449999943, 0)
-	Overlay.Size = UDim2.new(0.934152126, 0, 0.921139061, 0)
-	Overlay.ZIndex = 0
-	Overlay.Image = "rbxassetid://2739347995"
-	Overlay.ImageColor3 = Color3.fromRGB(245, 197, 130)
-	Overlay.ScaleType = Enum.ScaleType.Slice
-	Overlay.SliceCenter = Rect.new(5, 5, 5, 5)
+	SideBar.Name = "SideBar"
+	SideBar.Parent = MainFrame
+	SideBar.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+	SideBar.BorderColor3 = Color3.fromRGB(255, 255, 255)
+	SideBar.BorderSizePixel = 0
+	SideBar.Position = UDim2.new(0, 0, 0.0650406554, 0)
+	SideBar.Size = UDim2.new(0.200000003, 0, 0.93495959, 0)
 
-	TabMain.Name = "TabMain"
-	TabMain.Parent = Mainn
-	TabMain.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	TabMain.BackgroundTransparency = 1.000
-	TabMain.Position = UDim2.new(0.0488046408, 0, 0.0601187646, 0)
-	TabMain.Size = UDim2.new(0.19049415, 0, 0.887688875, 0)
+	ScrollBar.Name = "ScrollBar"
+	ScrollBar.Parent = SideBar
+	ScrollBar.Active = true
+	ScrollBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	ScrollBar.BackgroundTransparency = 1.000
+	ScrollBar.BorderSizePixel = 0
+	ScrollBar.Position = UDim2.new(0, 0, 0.0120183518, 0)
+	ScrollBar.Size = UDim2.new(1, 0, 0.972764254, 0)
+	ScrollBar.ScrollBarThickness = 6
+	ScrollBar.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
 
-	Overlay_2.Name = "Overlay"
-	Overlay_2.Parent = TabMain
-	Overlay_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Overlay_2.BackgroundTransparency = 1.000
-	Overlay_2.Size = UDim2.new(1, 0, 1, 0)
-	Overlay_2.ZIndex = 0
-	Overlay_2.Image = "rbxassetid://2739347995"
-	Overlay_2.ImageColor3 = Color3.fromRGB(245, 197, 130)
-	Overlay_2.ScaleType = Enum.ScaleType.Slice
-	Overlay_2.SliceCenter = Rect.new(5, 5, 5, 5)
-
-	TabList.Name = "TabList"
-	TabList.Parent = TabMain
-	TabList.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	TabList.BackgroundTransparency = 1.000
-	TabList.Position = UDim2.new(0, 0, 0.0218978096, 0)
-	TabList.Size = UDim2.new(1, 0, 0.953771293, 0)
-
-	UIListLayout.Parent = TabList
+	UIListLayout.Parent = ScrollBar
 	UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	UIListLayout.Padding = UDim.new(0.00999999978, 0)
-
+	
 	Pages.Name = "Pages"
-	Pages.Parent = Mainn
+	Pages.Parent = MainFrame
 	Pages.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	Pages.BackgroundTransparency = 1.000
-	Pages.Position = UDim2.new(0.254000008, 0, 0.0599999987, 0)
-	Pages.Size = UDim2.new(0.699999988, 0, 0.888000011, 0)
+	Pages.Position = UDim2.new(0.200000003, 0, 0.0650406554, 0)
+	Pages.Size = UDim2.new(0.800000012, 0, 0.935000002, 0)
+	
+	TopBar.Name = "TopBar"
+	TopBar.Parent = ChadGui
+	TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	TopBar.BorderColor3 = Color3.fromRGB(255, 255, 255)
+	TopBar.BorderSizePixel = 0
+	TopBar.Position = UDim2.new(0.414, 0, 0.172, 0)
+	TopBar.Size = UDim2.new(0.246, 0, 0.033, 0)
 
-	OpenClose.Name = "OpenClose"
-	OpenClose.Parent = MainFrame
-	OpenClose.BackgroundColor3 = Color3.fromRGB(166, 134, 101)
-	OpenClose.Position = UDim2.new(0.030847894, 0, -0.0538141727, 0)
-	OpenClose.Size = UDim2.new(0.934152007, 0, 0.0975814164, 0)
-
-	openUI.Name = "openUI"
-	openUI.Parent = OpenClose
-
-	OpenCloseOverlay.Name = "OpenCloseOverlay"
-	OpenCloseOverlay.Parent = OpenClose
-	OpenCloseOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	OpenCloseOverlay.BackgroundTransparency = 1.000
-	OpenCloseOverlay.Size = UDim2.new(1.00000012, 0, 1.00000012, 0)
-	OpenCloseOverlay.ZIndex = 0
-	OpenCloseOverlay.Image = "rbxassetid://2739347995"
-	OpenCloseOverlay.ImageColor3 = Color3.fromRGB(245, 197, 130)
-	OpenCloseOverlay.ScaleType = Enum.ScaleType.Slice
-	OpenCloseOverlay.SliceCenter = Rect.new(5, 5, 5, 5)
-
-	OpenGui.Name = "OpenGui"
-	OpenGui.Parent = OpenClose
-	OpenGui.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	OpenGui.BackgroundTransparency = 1.000
-	OpenGui.Position = UDim2.new(0.833042443, 0, 0, 0)
-	OpenGui.Size = UDim2.new(0.166957572, 0, 1, 0)
-	OpenGui.Font = Enum.Font.SourceSans
-	OpenGui.Text = "━"
-	OpenGui.TextColor3 = Color3.fromRGB(0, 0, 0)
-	OpenGui.TextScaled = true
-	OpenGui.TextSize = 14.000
-	OpenGui.TextWrapped = true
-
-	Mainn.Name = "Mainn"
-	Mainn.Parent = MainFrame
-	Mainn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Mainn.BackgroundTransparency = 1.000
-	Mainn.Size = UDim2.new(1, 0, 1, 0)
-
+	OpenButton.Name = "OpenButton"
+	OpenButton.Parent = TopBar
+	OpenButton.BackgroundColor3 = Color3.fromRGB(255, 0, 4)
+	OpenButton.Position = UDim2.new(0.886584818, 0, 0.124999866, 0)
+	OpenButton.Size = UDim2.new(0.0700000003, 0, 0.699999988, 0)
+	OpenButton.Font = Enum.Font.SourceSans
+	OpenButton.Text = ""
+	OpenButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+	OpenButton.TextSize = 14.000
+	
+	
+	
 	local openedgui = true
-	OpenGui.MouseButton1Click:Connect(function()
+	OpenButton.MouseButton1Click:Connect(function()
 		if openedgui == true then
-			Mainn.Visible = false
-			MainFrame.ImageTransparency = 1
-			Overlay.ImageTransparency = 1
+			MainFrame.Visible = false
 			openedgui = false
 		else
-			Mainn.Visible = true
+			MainFrame.Visible = true
 			openedgui = true
-			MainFrame.ImageTransparency = 0.6
-			Overlay.ImageTransparency = 0.6
 		end
 
 	end)
-
-	local gui = OpenClose
-
+	
+	
+	local gui = TopBar
+	
 	local function update(input)
 		local delta = input.Position - dragStart
 		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		TopBar.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
 
 	gui.InputBegan:Connect(function(input)
@@ -1220,264 +1195,334 @@ function bozoui:CreateMainWindow()
 			update(input)
 		end
 	end)
-
-
-
+	
+	
+	
+	----------------------------------------------------------------------------
 	local TabHandler = {}
-
+	
 	function TabHandler:CreateTab(name)
-		name = name or "Unlabeled"
+		name = name or "N/A"
+		
+		local Bar = Instance.new("Frame")
 		local TextButton = Instance.new("TextButton")
-		local Overlay_3 = Instance.new("ImageLabel")
-		local UICorner = Instance.new("UICorner")
-		local Page1 = Instance.new("ScrollingFrame")
+		local Page = Instance.new("ScrollingFrame")
 		local UIListLayout_2 = Instance.new("UIListLayout")
+		
+		
+		Bar.Name = name
+		Bar.Parent = ScrollBar
+		Bar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+		Bar.Position = UDim2.new(0.0458715633, 0, 0.0120183481, 0)
+		Bar.Size = UDim2.new(0.949999988, 0, 0.0399999991, 0)
 
-		TextButton.Parent = TabList
-		TextButton.BackgroundColor3 = Color3.fromRGB(166, 134, 101)
-		TextButton.Size = UDim2.new(0.850000024, 0, 0.107000001, 0)
-		TextButton.Font = Enum.Font.SourceSans
+		TextButton.Parent = Bar
+		TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextButton.BackgroundTransparency = 1.000
+		TextButton.Size = UDim2.new(1, 0, 1, 0)
+		TextButton.Font = Enum.Font.SourceSansBold
 		TextButton.Text = name
-		TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-		TextButton.TextSize = 20
+		TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextButton.TextSize = 14.000
 		TextButton.TextScaled = true
-		TextButton.TextWrapped = true
 
-		Overlay_3.Name = name
-		Overlay_3.Parent = TextButton
-		Overlay_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Overlay_3.BackgroundTransparency = 1.000
-		Overlay_3.Size = UDim2.new(1, 0, 1.04999995, 0)
-		Overlay_3.ZIndex = 0
-		Overlay_3.Image = "rbxassetid://2739347995"
-		Overlay_3.ImageColor3 = Color3.fromRGB(245, 197, 130)
-		Overlay_3.ScaleType = Enum.ScaleType.Slice
-		Overlay_3.SliceCenter = Rect.new(5, 5, 5, 5)
-
-		UICorner.CornerRadius = UDim.new(0, 9)
-		UICorner.Parent = TextButton
-
-		Page1.Name = "Page1"
-		Page1.Parent = Pages
-		Page1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Page1.BackgroundTransparency = 1.000
-		Page1.BorderSizePixel = 0
-		Page1.Size = UDim2.new(1, 0, 1, 0)
-		Page1.BottomImage = "rbxassetid://3515608177"
-		Page1.CanvasSize = UDim2.new(0, 0, 3, 0)
-		Page1.MidImage = "rbxassetid://3515608813"
-		Page1.ScrollBarThickness = 10
-		Page1.TopImage = "rbxassetid://3515609176"
-		Page1.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-		Page1.Visible = false
-
-		UIListLayout_2.Parent = Page1
+		Page.Name = "Page"
+		Page.Parent = Pages
+		Page.Active = true
+		Page.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Page.BackgroundTransparency = 1.000
+		Page.Position = UDim2.new(0.0137614682, 0, 0.0130429128, 0)
+		Page.Size = UDim2.new(0.986238539, 0, 0.971740365, 0)
+		Page.ScrollBarThickness = 8
+		
+		UIListLayout_2.Parent = Page
 		UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
 		UIListLayout_2.Padding = UDim.new(0.00499999989, 0)
-
-
+		
 		TextButton.MouseButton1Click:Connect(function()
 			for i,v in next, Pages:GetChildren() do
 				v.Visible = false
 			end
-			Page1.Visible = true
+			Page.Visible = true
 		end)
-
+		
+		
+		-------------------------------------------------------------------------------
 		local ElementHandler = {}
-        function ElementHandler:focus()
-            for i,v in next, Pages:GetChildren() do
+		
+		function ElementHandler:focus()
+			for i,v in next, Pages:GetChildren() do
 				v.Visible = false
 			end
-			Page1.Visible = true
-        end
-
+			Page.Visible = true
+		end
+		
+		
+		
+		
 		function ElementHandler:CreateButton(btnText, butfunc)
-			btnText = btnText or "unlabeled"
+			btnText = btnText or "N/A"
 			butfunc = butfunc or function() end
-
-			local Button = Instance.new("Frame")
-			local TextButton_2 = Instance.new("TextButton")
-			local Overlay_5 = Instance.new("ImageLabel")
-			local TextLabel_2 = Instance.new("TextLabel")
-			local UICorner_3 = Instance.new("UICorner")
+			
+			
+			local ButtonFrame = Instance.new("Frame")
+			local Button = Instance.new("TextButton")
+			local ButtonText = Instance.new("TextLabel")
+			
+			ButtonFrame.Name = "ButtonFrame"
+			ButtonFrame.Parent = Page
+			ButtonFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+			ButtonFrame.Position = UDim2.new(0, 0, 6.82689389e-08, 0)
+			ButtonFrame.Size = UDim2.new(1, 0, 0.05, 0)
 
 			Button.Name = "Button"
-			Button.Parent = Page1
-			Button.BackgroundColor3 = Color3.fromRGB(166, 134, 101)
-			Button.Position = UDim2.new(0.022327058, 0, 0.0110666938, 0)
-			Button.Size = UDim2.new(0.907056034, 0, 0.0420861132, 0)
+			Button.Parent = ButtonFrame
+			Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			Button.Position = UDim2.new(0.866159976, 0, 0.192073166, 0)
+			Button.Size = UDim2.new(0, 25, 0, 25)
+			Button.Font = Enum.Font.SourceSans
+			Button.Text = ""
+			Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+			Button.TextSize = 14.000
+
+			ButtonText.Name = "ButtonText"
+			ButtonText.Parent = ButtonFrame
+			ButtonText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			ButtonText.BackgroundTransparency = 1.000
+			ButtonText.Position = UDim2.new(0.0215827338, 0, 0, 0)
+			ButtonText.Size = UDim2.new(0, 249, 0, 40)
+			ButtonText.Font = Enum.Font.SourceSansBold
+			ButtonText.Text = btnText
+            ButtonText.TextScaled = true
+			ButtonText.TextColor3 = Color3.fromRGB(255, 255, 255)
+			ButtonText.TextSize = 25.000
+			ButtonText.TextXAlignment = Enum.TextXAlignment.Left
 			
-
-			TextButton_2.Parent = Button
-			TextButton_2.BackgroundColor3 = Color3.fromRGB(124, 100, 75)
-			TextButton_2.Position = UDim2.new(0.746478856, 0, 0.181818187, 0)
-			TextButton_2.Size = UDim2.new(0.200000003, 0, 0.600000024, 0)
-			TextButton_2.Font = Enum.Font.Gotham
-			TextButton_2.Text = ""
-			TextButton_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-			TextButton_2.TextScaled = true
-			TextButton_2.TextSize = 14.000
-			TextButton_2.TextWrapped = true
-
-			Overlay_5.Name = "Overlay"
-			Overlay_5.Parent = Button
-			Overlay_5.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Overlay_5.BackgroundTransparency = 1.000
-			Overlay_5.Size = UDim2.new(1, 0, 1.04999995, 0)
-			Overlay_5.ZIndex = 0
-			Overlay_5.Image = "rbxassetid://2739347995"
-			Overlay_5.ImageColor3 = Color3.fromRGB(245, 197, 130)
-			Overlay_5.ScaleType = Enum.ScaleType.Slice
-			Overlay_5.SliceCenter = Rect.new(5, 5, 5, 5)
-
-			TextLabel_2.Parent = Button
-			TextLabel_2.Text = btnText
-			TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			TextLabel_2.BackgroundTransparency = 1.000
-			TextLabel_2.Position = UDim2.new(0.0345057622, 0, 0, 0)
-			TextLabel_2.Size = UDim2.new(0.711973131, 0, 1.00000012, 0)
-			TextLabel_2.Font = Enum.Font.SourceSans
-			TextLabel_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-			TextLabel_2.TextSize = 40.000
-			TextLabel_2.TextWrapped = true
-			TextLabel_2.TextScaled = true
-			TextLabel_2.TextXAlignment = Enum.TextXAlignment.Left
-
-			UICorner_3.Parent = Button
-
-			TextButton_2.MouseButton1Click:Connect(function()
+			
+			Button.MouseButton1Click:Connect(function()
 				butfunc()
 			end)		
+		
 		end
-
-
-
+		
 		function ElementHandler:CreateToggle(togname, togfunc)
 			local tog = false
-			togname = togname or "unlabeled"
+			togname = togname or "N/A"
 			togfunc = togfunc or function() end
+			
+			local ToggleFrame = Instance.new("Frame")
+			local ToggleText = Instance.new("TextLabel")
+			local ToggleButton = Instance.new("TextButton")
+			
+			
+			ToggleFrame.Name = "ToggleFrame"
+			ToggleFrame.Parent = Page
+			ToggleFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+			ToggleFrame.Position = UDim2.new(0, 0, 6.82689389e-08, 0)
+			ToggleFrame.Size = UDim2.new(1, 0, 0.05, 0) 
 
-			local ToggleButton = Instance.new("Frame")
-			local Overlay_4 = Instance.new("ImageLabel")
-			local TextLabel = Instance.new("TextLabel")
-			local UICorner_2 = Instance.new("UICorner")
-			local TextButton = Instance.new("TextButton")
+			ToggleText.Name = "ToggleText"
+			ToggleText.Parent = ToggleFrame
+			ToggleText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			ToggleText.BackgroundTransparency = 1.000
+			ToggleText.Position = UDim2.new(0.0196372196, 0, 0, 0)
+			ToggleText.Size = UDim2.new(0, 249, 0, 40)
+			ToggleText.Font = Enum.Font.SourceSansBold
+			ToggleText.Text = togname
+            ToggleText.TextScaled = true
+			ToggleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+			ToggleText.TextSize = 25.000
+			ToggleText.TextXAlignment = Enum.TextXAlignment.Left
 
 			ToggleButton.Name = "ToggleButton"
-			ToggleButton.Parent = Page1
-			ToggleButton.BackgroundColor3 = Color3.fromRGB(166, 134, 101)
-			ToggleButton.Position = UDim2.new(0.022327058, 0, 0.0110666938, 0)
-			ToggleButton.Size = UDim2.new(0.907056034, 0, 0.0420861132, 0)
+			ToggleButton.Parent = ToggleFrame
+			ToggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			ToggleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+			ToggleButton.BorderSizePixel = 2
+			ToggleButton.Position = UDim2.new(0.866159976, 0, 0.193292752, 0)
+			ToggleButton.Size = UDim2.new(0, 25, 0, 25)
+			ToggleButton.Font = Enum.Font.Nunito
+			ToggleButton.Text = ""
+			ToggleButton.TextColor3 = Color3.fromRGB(2, 170, 0)
+			ToggleButton.TextSize = 39.000
+
 			
-
-			Overlay_4.Name = "Overlay"
-			Overlay_4.Parent = ToggleButton
-			Overlay_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Overlay_4.BackgroundTransparency = 1.000
-			Overlay_4.Size = UDim2.new(1, 0, 1.04999995, 0)
-			Overlay_4.ZIndex = 0
-			Overlay_4.Image = "rbxassetid://2739347995"
-			Overlay_4.ImageColor3 = Color3.fromRGB(245, 197, 130)
-			Overlay_4.ScaleType = Enum.ScaleType.Slice
-			Overlay_4.SliceCenter = Rect.new(5, 5, 5, 5)
-
-			TextLabel.Parent = ToggleButton
-			TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			TextLabel.BackgroundTransparency = 1.000
-			TextLabel.Position = UDim2.new(0.0345057622, 0, 0, 0)
-			TextLabel.Size = UDim2.new(0.711973131, 0, 1.00000012, 0)
-			TextLabel.Font = Enum.Font.SourceSans
-			TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-			TextLabel.TextSize = 40.000
-			TextLabel.TextWrapped = true
-			TextLabel.Text = togname
-			TextLabel.TextScaled = true
-			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-			UICorner_2.Parent = ToggleButton
-
-			TextButton.Parent = ToggleButton
-			TextButton.BackgroundColor3 = Color3.fromRGB(124, 100, 75)
-			TextButton.Position = UDim2.new(0.746478856, 0, 0.181818187, 0)
-			TextButton.Size = UDim2.new(0.200000003, 0, 0.600000024, 0)
-			TextButton.AutoButtonColor = false
-			TextButton.Font = Enum.Font.Gotham
-			TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-			TextButton.Text = ""
-			TextButton.TextScaled = true
-			TextButton.TextSize = 14.000
-			TextButton.TextWrapped = true
-
-			TextButton.MouseButton1Click:Connect(function()
+			
+			ToggleButton.MouseButton1Click:Connect(function()
 				tog = not tog
 				if tog == true then
-					TextButton.Text = "X"
+                    ToggleButton.BackgroundColor3 = Color3.fromRGB(2, 170, 0)
 				else
-					TextButton.Text = ""
+                    ToggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 				end
 				togfunc(tog)
 			end)
 			return tog
 		end
+		
+		function ElementHandler:CreateSlider(sliderName, MinValue, MaxValue, CallBack)
+			local Value;
+			local moveconnection;
+			local releaseconnection;
+			
+			sliderName = sliderName or "N/A"
+			MinValue = MinValue or 0
+			MaxValue = MaxValue or 100
+			
+			local SliderFrame = Instance.new("Frame")
+			local SliderButton = Instance.new("TextButton")
+			local Frame = Instance.new("Frame")
+			local SliderValue = Instance.new("TextLabel")
+			local SliderText = Instance.new("TextLabel")
+			
+			
+			SliderFrame.Name = "SliderFrame"
+			SliderFrame.Parent = Page
+			SliderFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+			SliderFrame.Position = UDim2.new(0, 0, 0.204018712, 0)
+			SliderFrame.Size = UDim2.new(1, 0, 0.1, 0)
 
+			SliderButton.Name = "SliderButton"
+			SliderButton.Parent = SliderFrame
+			SliderButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			SliderButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderButton.BorderSizePixel = 0
+			SliderButton.Position = UDim2.new(0.0215827338, 0, 0.555508494, 0)
+			SliderButton.Size = UDim2.new(0.954888999, 0, 0.295751035, 0)
+			SliderButton.AutoButtonColor = false
+			SliderButton.Font = Enum.Font.SourceSans
+			SliderButton.Text = ""
+			SliderButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+			SliderButton.TextSize = 14.000
 
+			Frame.Parent = SliderButton
+			Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 4)
+			Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Frame.BorderSizePixel = 0
+			Frame.Size = UDim2.new(0, 0, 1, 0)
 
+			SliderValue.Name = "SliderValue"
+			SliderValue.Parent = SliderFrame
+			SliderValue.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderValue.BackgroundTransparency = 1.000
+			SliderValue.Position = UDim2.new(0.866159976, 0, 0, 0)
+			SliderValue.Size = UDim2.new(0.110311754, 0, 0.555508375, 0)
+			SliderValue.Font = Enum.Font.SourceSansBold
+			SliderValue.Text = MinValue
+            SliderValue.TextScaled = true
+			SliderValue.TextColor3 = Color3.fromRGB(255, 255, 255)
+			SliderValue.TextSize = 22.000
 
+			SliderText.Name = "SliderText"
+			SliderText.Parent = SliderFrame
+			SliderText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SliderText.BackgroundTransparency = 1.000
+			SliderText.Position = UDim2.new(0.0196372196, 0, 0, 0)
+			SliderText.Size = UDim2.new(0.402877688, 0, 0.555508375, 0)
+			SliderText.Font = Enum.Font.SourceSansBold
+			SliderText.Text = sliderName
+			SliderText.TextColor3 = Color3.fromRGB(255, 255, 255)
+			SliderText.TextSize = 22.000
+            SliderText.TextScaled = true
+			SliderText.TextXAlignment = Enum.TextXAlignment.Left
+			
+			
+			
 
-
-
+			SliderButton.MouseButton1Down:Connect(function()
+				Value = math.floor((((tonumber(MaxValue) - tonumber(MinValue)) / SliderButton.AbsoluteSize.X) * Frame.AbsoluteSize.X) + tonumber(MinValue) + 0.5) or 0
+				
+					CallBack(Value)
+				
+				Frame.Size = UDim2.new(math.clamp((mouse.X - Frame.AbsolutePosition.X) / SliderButton.AbsoluteSize.X, 0, 1), 0, 1, 0)
+                Value = math.floor((((tonumber(MaxValue) - tonumber(MinValue)) / SliderButton.AbsoluteSize.X) * Frame.AbsoluteSize.X) + tonumber(MinValue) + 0.5) or 0
+                SliderValue.Text = Value
+				moveconnection = mouse.Move:Connect(function()
+					SliderValue.Text = Value
+					Value = math.floor((((tonumber(MaxValue) - tonumber(MinValue)) / SliderButton.AbsoluteSize.X) * Frame.AbsoluteSize.X) + tonumber(MinValue) + 0.5)
+					
+						CallBack(Value)
+					
+					Frame.Size = UDim2.new(math.clamp((mouse.X - Frame.AbsolutePosition.X) / SliderButton.AbsoluteSize.X, 0, 1), 0, 1, 0)
+				end)
+				releaseconnection = UserInputService.InputEnded:Connect(function(Mouse)
+					if Mouse.UserInputType == Enum.UserInputType.MouseButton1 then
+						Value = math.floor((((tonumber(MaxValue) - tonumber(MinValue)) / SliderButton.AbsoluteSize.X) * Frame.AbsoluteSize.X) + tonumber(MinValue) + 0.5)
+						
+							CallBack(Value)
+						
+						Frame.Size = UDim2.new(math.clamp((mouse.X - Frame.AbsolutePosition.X) / SliderButton.AbsoluteSize.X, 0, 1), 0, 1, 0)
+						moveconnection:Disconnect()
+						releaseconnection:Disconnect()
+					end
+				end)
+			end)
+			
+			
+			
+		end
+		
+		
 		return ElementHandler
-	end
+	 end
 	return TabHandler
 end
 
 
+--[[
+Variables |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+]]
+
+
 local falldmg;
 local nostun;
+local ingredientpickup;
+local trinketpickup;
+local autobard;
+local noinjuries;
+local betterambient;
+local enablechamsevent = Instance.new("BindableEvent")
+local enabledesp = false
+local enabledchams = false
+local walkspeedenabled;
+local WalkSpeedValue;
+local speedconnection;
 
 
 
-local main = bozoui:CreateMainWindow()
+
+
+local main = chadgui:CreateMainWindow()
 local localplayertab = main:CreateTab("LocalPlayer")
-
+local worldtab = main:CreateTab("World")
+local LightingTab = main:CreateTab("Lighting")
+local VisualTab = main:CreateTab("Visual")
 localplayertab:focus()
-
-
 
 localplayertab:CreateButton("Reset", function()
 	game.Players.LocalPlayer.Character:BreakJoints()
 end)
 
-
-
 localplayertab:CreateButton("Wipe", function()
-		game.Players.LocalPlayer.Character.FallDamage.RemoteEvent:FireServer(1000)
+	game.Players.LocalPlayer.Character.FallDamage.RemoteEvent:FireServer(1000)
 end)
 
 local nostuntoggle = localplayertab:CreateToggle("NoStun", function(bool)
 	nostun = bool
+
+    if nostun then
+        if table.getn(game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name].Status:GetChildren()) >0 then
+            for i,v in pairs(game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name].Status:GetChildren()) do
+                v:Destroy()
+            end
+        end
+    end
+
 end)
 
 local newtoggle = localplayertab:CreateToggle("NoFall", function(bool)
 	falldmg = bool
 end)
-
-local worldtab = main:CreateTab("World")
-
-
-coroutine.wrap(function()
-	while true do
-		task.wait(1)
-		if nostun then
-			if table.getn(game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name].Status:GetChildren()) >0 then
-				for i,v in pairs(game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name].Status:GetChildren()) do
-					v:Destroy()
-				end
-			end
-		end
-	end
-end)()
-
 
 coroutine.wrap(function()
 	local t = {
@@ -1490,22 +1535,14 @@ coroutine.wrap(function()
 		"ForwardDash",
 		"RecentDash",
 		"ClimbCoolDown",
-		"BrokenLeg",
-		"Knocked",
-		"Unconscious",
-		"BrokenLeg",
-		"BrokenRib",
-		"BrokenArm",
-		"NoDam",
 		"NoDash",
 		"Casting",
-		"BeingExecuted",
 		"IsClimbing"
 	}
 	repeat task.wait(0.5) until game:GetService("Workspace").AliveData:FindFirstChild(game.Players.LocalPlayer.Name) and game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name]:FindFirstChild("Status")
 	game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name].Status.ChildAdded:Connect(function(child)
 		if nostun == true and table.find(t, child.Name) then
-			task.wait(0.1)
+			task.wait()
 			child:remove()
 		end
 	end)
@@ -1515,15 +1552,34 @@ end)()
 
 
 coroutine.wrap(function()
-	local method 
+	--[[local method 
 	method = hookmetamethod(game, "__namecall", function(self, ...)
 		if falldmg == true then
 			if not checkcaller() and getnamecallmethod() == "FireServer" and self.Parent.Name == "FallDamage" then
-				return 0
+				return 
 			end
 		end
 		return method(self, ...)
 	end)
+--]]
+
+	local old
+	old = hookfunction(Instance.new("RemoteFunction").InvokeServer, newcclosure(function(instance, ...)
+		if falldmg == true then
+			if not checkcaller() and instance.Parent.Name == "FallDamage" then
+				return 
+			end
+		end
+		return old(instance, ...)
+	end))
+
+
+
+
+
+
+
+
 end)()
 
 local nokillbricks = worldtab:CreateToggle("No Kill Bricks", function(onoff)
@@ -1550,55 +1606,388 @@ end)
 
 
 local lightconnection
-local shadowconnection
-local fogconnection
+local brightnessloop
 
-local newtoggle = worldtab:CreateToggle("FullBright", function(onoff)
+
+local newtoggle = LightingTab:CreateToggle("FullBright", function(onoff)
 	onoff = onoff or false
 
-	if lightconnection then
-		lightconnection:Disconnect()
+	if brightnessloop then
+		brightnessloop:Disconnect()
 	end
-	if shadowconnection then
-		shadowconnection:Disconnect()
-	end
-
-
 
 	if onoff == true then
-		lightconnection = game:GetService("Lighting"):GetPropertyChangedSignal("Brightness"):Connect(function()
-			game:GetService("Lighting").Brightness = 1
-		end)
-		shadowconnection = game:GetService("Lighting"):GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-			game:GetService("Lighting").GlobalShadows = false
-		end)
-		game:GetService("Lighting").Brightness = 1
-		game:GetService("Lighting").GlobalShadows = false
+		brightnessloop = game:GetService("RunService").RenderStepped:Connect(function()
+            game:GetService("Lighting").GlobalShadows = false
+            game:GetService("Lighting").Brightness = 1.5
+            game:GetService("Lighting")["AreaBrightness"].Value = 1.25
+        end)
 	else
 		game:GetService("Lighting").GlobalShadows = true
 	end
 end)
 
-local newtoggle2 = worldtab:CreateToggle("NoFog", function(onoff)
+local newtoggle2 = LightingTab:CreateToggle("NoFog", function(onoff)
 	onoff = onoff or false
 
 	if lightconnection then
 		lightconnection:Disconnect()
 	end
-	
+
 
 
 
 	if onoff == true then
 		fogconnection = game:GetService("Lighting"):GetPropertyChangedSignal("FogEnd"):Connect(function()
 			game:GetService("Lighting").FogEnd = 786543
+			game:GetService("Lighting")['AreaOutdoor'].Value = Color3.fromRGB(255,255,255)
 		end)
 		game:GetService("Lighting").FogEnd = 786543
 	end
 end)
 
+local toggleingredients = worldtab:CreateToggle("Ingredient pickup", function(onoff)
+	onoff = onoff or false
+	ingredientpickup = onoff
+end)
+
+
+
+
+coroutine.wrap(function()
+	local ingredientsfolder
+
+	for i,v in pairs(game.Workspace:GetChildren()) do
+		if v:IsA("Folder") and v.Name == "Folder" then
+			if #v:GetChildren() > 5 then
+				ingredientsfolder = v
+			end
+		end
+	end
+
+	local localplayer = game.Players.LocalPlayer
+	while task.wait(0.5) do
+		if ingredientpickup and ingredientsfolder then
+			for i,v in pairs(ingredientsfolder:GetChildren()) do
+				if v.Name ~= "Blood Thorn" then
+					if localplayer.Character and v:IsA('UnionOperation') and v:FindFirstChild('ClickDetector') then
+						if (localplayer.Character.HumanoidRootPart.Position - v.Position).Magnitude <= 25 then
+							fireclickdetector(v:FindFirstChild("ClickDetector"))
+							task.wait(0.1)
+						end
+					end
+				end
+			end
+		end
+	end
+end)()
+
+local trinketloop
+local toggletrinkets = worldtab:CreateToggle("Trinket pickup", function(onoff)
+	onoff = onoff or false
+	trinketpickup = onoff
+    if trinketloop then
+    trinketloop:Disconnect()
+    end
+    if onoff then
+
+    local localplayer = game.Players.LocalPlayer
+     trinketloop =  game:GetService("RunService").RenderStepped:Connect(function()
+        task.wait(0.2)
+        for i,v in pairs(game.Workspace:GetChildren()) do
+            if localplayer.Character and localplayer.Character:FindFirstChild("HumanoidRootPart") and (v:IsA('UnionOperation') or v:IsA('Part') or v:IsA('MeshPart')) then
+                if (localplayer.Character.HumanoidRootPart.Position - v.Position).Magnitude <= 19 then
+                    task.wait(0.1)
+                    fireclickdetector(v:FindFirstChild("Part"):FindFirstChildWhichIsA("ClickDetector"))
+                    --[[for i2,v2 in pairs(v:GetChildren()) do
+                        if v2:FindFirstChildWhichIsA("ClickDetector") then
+                            fireclickdetector(v2:FindFirstChildWhichIsA("ClickDetector"))
+                            task.wait(0.1)
+                        end
+                    end]]
+                end
+            end
+        end
+     end)
+    end
+
+end)
+
+
+
+
+
+
+local toggletrinkets = localplayertab:CreateToggle("Auto Bard", function(onoff)
+	onoff = onoff or false
+	autobard = onoff
+end)
+
+coroutine.wrap(function()
+	local bardgui = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("BardGui")
+
+
+	bardgui.ChildAdded:Connect(function(part)
+		if autobard and part:IsA("ImageButton") then
+			task.wait(0.9)
+			firesignal(part.MouseButton1Click)
+		end
+	end)
+end)()
+
+
+
+local noinjuriestoggle = localplayertab:CreateToggle("No Injuries", function(bool)
+	noinjuries = bool
+end)
+
+coroutine.wrap(function()
+	local t = {
+		"BrokenLeg",
+		"Knocked",
+		"Unconscious",
+		"BrokenLeg",
+		"BrokenRib",
+		"BrokenArm",
+		"NoDam",
+		"BeingExecuted",
+	}
+	repeat task.wait(0.5) until game:GetService("Workspace").AliveData:FindFirstChild(game.Players.LocalPlayer.Name) and game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name]:FindFirstChild("Status")
+	game:GetService("Workspace").AliveData[game.Players.LocalPlayer.Name].Status.ChildAdded:Connect(function(child)
+		if noinjuries == true and table.find(t, child.Name) then
+			task.wait()
+			child:remove()
+		end
+	end)
+end)()
+
+
+local betterambientloop
+local BetterAmbienttab = LightingTab:CreateToggle("Better Ambient", function(bool)
+	betterambient = bool
+    if betterambientloop then
+     betterambientloop:Disconnect()
+    end
+if bool then
+   betterambientloop = game:GetService("RunService").RenderStepped:Connect(function()
+        task.wait(0.5)
+		if betterambient then
+			game:GetService("Lighting").areacolor.TintColor = Color3.fromRGB(255,255,255)
+		end
+    end)
+end
+
+end)
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------ esp
+
+local safefolder = Instance.new("Folder")
+safefolder.Parent = game.CoreGui
+
+function createesp(plr)
+	local connection1
+	local connection2
+
+	local destroychamsevent = Instance.new("BindableEvent")
+
+	if plr.Character and plr.Character.PrimaryPart then
+		local plrfolder = Instance.new("Folder")
+
+		local BillboardGui = Instance.new("BillboardGui")
+		local Name = Instance.new("TextLabel")
+		local Health = Instance.new("Frame")
+		local HealthBar = Instance.new("Frame")
+		local HealthNumber = Instance.new("TextLabel")
+
+		plrfolder.Name = plr.Name
+		plrfolder.Parent = safefolder
+
+		BillboardGui.Parent = plrfolder
+		BillboardGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		BillboardGui.Active = true
+		BillboardGui.Adornee = plr.Character.PrimaryPart
+		BillboardGui.AlwaysOnTop = true
+		BillboardGui.LightInfluence = 1.000
+		BillboardGui.Size = UDim2.new(0, 100, 0, 25)
+		BillboardGui.StudsOffset = Vector3.new(0, 3.5, 0)
+
+		Name.Name = "Name"
+		Name.Parent = BillboardGui
+		Name.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Name.BackgroundTransparency = 1.000
+		Name.Position = UDim2.new(-0.5, 0, -0.5, 0)
+		Name.Size = UDim2.new(2, 0, 1, 0)
+		Name.Font = Enum.Font.Code
+		Name.Text = "Name: amongus | class: druid"
+		Name.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Name.TextScaled = true
+		Name.TextSize = 14.000
+		Name.TextStrokeTransparency = 0.420
+		Name.TextWrapped = true
+
+		local chare = plr.Character
+		local root = chare.PrimaryPart
+
+		if chare and root then
+			for i, v in pairs(chare:GetChildren()) do
+				if v:IsA("Part") and v ~= root then
+					local chams = Instance.new("BoxHandleAdornment")
+					chams.Adornee = v
+					chams.AlwaysOnTop = true
+					chams.Parent = plrfolder
+					chams.Size = v.Size
+					chams.ZIndex = 10
+					chams.Transparency = 0.3
+					chams.Visible = enabledchams
+					if
+						plr:FindFirstChild("Data") and plr.Data:FindFirstChild("HouseName") and
+						plr.Data:FindFirstChild("HouseName").Value ~= "" and
+						game.Players.LocalPlayer:FindFirstChild("Data") and
+						plr.Data:FindFirstChild("HouseName").Value == game.Players.LocalPlayer.Data.HouseName.Value
+					then
+						chams.Color3 = Color3.fromRGB(0, 255, 0)
+					else
+						chams.Color3 = Color3.fromRGB(255, 0, 0)
+					end
+
+					enablechamsevent.Event:Connect(function(bool)
+						if bool == true then
+							chams.Visible = true
+						else
+							chams.Visible = false
+						end
+
+					end)
+
+					coroutine.wrap(function()
+                        repeat task.wait(0.2) until game.Players.LocalPlayer:FindFirstChild("Data") and game.Players.LocalPlayer.Data:FindFirstChild("HouseName")
+						task.wait(1)
+						if plr:FindFirstChild("Data") and plr.Data:FindFirstChild("HouseName") and plr.Data:FindFirstChild("HouseName").Value ~= "" and game.Players.LocalPlayer:FindFirstChild("Data") and plr.Data:FindFirstChild("HouseName").Value == game.Players.LocalPlayer.Data.HouseName.Value then
+							chams.Color3 = Color3.fromRGB(0, 255, 0)
+						else
+							chams.Color3 = Color3.fromRGB(255, 0, 0)
+						end
+					end)()
+					connection1 = plr.CharacterRemoving:Connect(function()
+						chams:Destroy()
+						if connection1 then connection1:Disconnect() end
+					end)
+
+				end
+			end
+		end
+
+
+		local Char = plr.Character
+		local root = Char.PrimaryPart
+
+		coroutine.wrap(
+			function()
+				connection2 = plr.CharacterRemoving:Connect(function()
+					destroychamsevent:Fire()
+					if BillboardGui then
+						BillboardGui:Destroy()
+					end
+					for i, v in pairs(plrfolder:GetChildren()) do
+						v:Destroy()
+					end
+					if plrfolder then
+						plrfolder:Destroy()
+					end
+					connection2:Disconnect()
+				end)
+
+				while true do
+					task.wait(0.2)
+					if BillboardGui and Char and root then
+						if Char and Char:FindFirstChild("Humanoid") then
+							local healthvalue = Char.Humanoid.Health
+							Name.Text = "Name: " .. plr.Data.oName.Value .. " | " .. "Class: " .. plr.Data.Class.Value.. " | ".. "Health: " .. math.round(healthvalue)
+
+							BillboardGui.Enabled = enabledesp
+							--local healthvalue = chare.Humanoid.Health
+							--local health = math.clamp(healthvalue / maxhealthvalue, 0, 1)
+							--HealthBar.Size = UDim2.fromScale(health, 1)
+							--HealthNumber.Text = math.round(healthvalue)
+						end
+					else
+						break
+					end
+				end
+			end
+		)()
+	end
+end
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+for i, v in pairs(Players:GetPlayers()) do
+	if v ~= LocalPlayer then
+		if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+			createesp(v)
+		end
+		v.CharacterAdded:Connect(
+			function(chare)
+				v.Character:WaitForChild("HumanoidRootPart")
+				v.Character:WaitForChild("Humanoid")
+				task.wait(0.5)
+				createesp(v)
+			end
+		)
+	end
+end
+
+Players.PlayerAdded:Connect(
+	function(Player)
+		Player.CharacterAdded:Connect(
+			function(chare)
+				Player.Character:WaitForChild("HumanoidRootPart")
+				Player.Character:WaitForChild("Humanoid")
+				task.wait(0.5)
+				createesp(Player)
+			end)
+		Player.CharacterRemoving:Connect(function()
+			if safefolder:FindFirstChild(Player.Name) then
+				safefolder[Player.Name]:Destroy()
+			end
+		end)
+	end)
+
+local esp = VisualTab:CreateToggle("Esp", function(bool)
+	enabledesp = bool
+end)
+local chams = VisualTab:CreateToggle("Chams", function(bool)
+	enabledchams = bool
+	enablechamsevent:Fire(bool)
+end)
+
+function changespeed()
+    if walkspeedenabled and  game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.PrimaryPart then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = WalkSpeedValue
+    end
+end
+
+local WalkSpeed = localplayertab:CreateToggle("WalkSpeed", function(bool)
+    bool = bool or false
+    walkspeedenabled = bool
+    if speedconnection then
+        speedconnection:Disconnect()
+    end
+    if bool and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character.PrimaryPart then
+        speedconnection = game.Players.LocalPlayer.Character.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(changespeed)
+    end
+end)
+
+localplayertab:CreateSlider("WalkSpeed", 16, 200, function(value)
+    WalkSpeedValue = value
+    if walkspeedenabled then
+        changespeed()
+    end
+end)
 
 
 return
 
-end
